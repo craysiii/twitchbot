@@ -1,4 +1,5 @@
 require 'twitchbot/version'
-
-module Twitchbot
-end
+require 'twitchbot/bot'
+require 'twitchbot/plugin'
+require 'twitchbot/message_plugin'
+require 'twitchbot/timed_plugin'
