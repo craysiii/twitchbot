@@ -1,8 +1,12 @@
 # Twitchbot
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/twitchbot`. To experiment with that code, run `bin/console` for an interactive prompt.
+A plugin-based framework for creating Twitch chat bots, written in Ruby and based on `EventMachine` and `Faye::WebSocket`.
 
-TODO: Delete this and the text above, and describe your gem
+Notes:
+* Plugins are first class citizens
+* Helper functions implemented to gate-keep commands
+* Bot can currently only join one channel (it might stay that way)
+* Read the source until I get all the documentation completed
 
 ## Installation
 
@@ -20,9 +24,61 @@ Or install it yourself as:
 
     $ gem install twitchbot
 
-## Usage
+## Getting Started
 
-TODO: Write usage instructions here
+Require Twitchbot
+
+    require 'twitchbot'
+    
+Create Plugins
+
+    # MessagePlugin, which listens for the registered command preceeded by the Bot command_prefix
+    class HiPlugin
+      include Twitchbot::MessagePlugin
+    
+      register command: 'hi', method: :say_hi
+    
+      def say_hi(message, arg)
+        message.respond 'Hello world!'
+      end
+    end
+    
+    # TimedPlugin, which fires off the registered command periodically
+    class ShoutOutPlugin
+      include Twitchbot::TimedPlugin
+    
+      register method: :social, interval: 15 # Time in seconds
+    
+      def social(handler)
+        handler.send_channel('Hello! Check my social media out!')
+      end
+    end
+    
+    # Plugin, which listens for registered commands according to the raw IRC command
+    class PutsPlugin
+        include Twitchbot::Plugin
+        
+        register command: 'PRIVMSG', method: :put_string
+        
+        def put_string(handler)
+            handler.messages.each do |message|
+                puts message
+            end
+        end
+    end
+    
+Create and start `Bot`
+
+    bot = Twitchbot::Bot.new do |bot|
+      bot.username = 'bot_name'
+      bot.password = 'oauth:password'
+      bot.channel = 'channel_name'
+      bot.plugins = [HiPlugin, ShoutOutPlugin, PutsPlugin]
+      bot.debug = true
+      # bot.command_prefix = '$' # Default is '!'
+    end
+    
+    bot.start
 
 ## Development
 
@@ -32,7 +88,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/twitchbot.
+Bug reports and pull requests are welcome on GitHub at https://github.com/craysiii/twitchbot.
 
 ## License
 
