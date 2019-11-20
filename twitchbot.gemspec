@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Charles Ray Shisler III']
   spec.email         = ['charles@cray.io']
 
-  spec.summary       = 'A library for creating Twitch.tv chat bots'
+  spec.summary       = 'A framework for creating Twitch.tv chat bots'
   spec.homepage      = 'https://github.com/craysiii/twitchbot'
   spec.license       = 'MIT'
 
