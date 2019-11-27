@@ -65,9 +65,29 @@ module Twitchbot
       @command.eql? 'PRIVMSG'.freeze
     end
 
+    # Method to determine if the IRC message is a whisper to the bot
+    def whisper?
+      @command.eql? 'WHISPER'.freeze
+    end
+
     # Method to respond to the IRC message target with a private message
     def respond(message)
-      @handler.bot.message_queue.push("PRIVMSG #{@target} :#{message}")
+      if message?
+        send_channel message
+      end
+      if whisper?
+        send_whisper @user, message
+      end
+    end
+
+    # Method to send a message to the joined [Channel]
+    def send_channel(message)
+      @handler.send_channel message
+    end
+
+    # Method to send a whisper to the specified [User]
+    def send_whisper(user, message)
+      @handler.send_whisper user, message
     end
 
     # Method to determine if the IRC message is a PING challenge
