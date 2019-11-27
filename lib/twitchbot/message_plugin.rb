@@ -16,7 +16,7 @@ module Twitchbot
           command = _command.delete prefix
           commands = COMMANDS[self.class]
           if !command.nil? && !commands[command].nil?
-            send(commands[command], message, arguments)
+            send(commands[command], message, arguments.lstrip)
           end
         end
       end
