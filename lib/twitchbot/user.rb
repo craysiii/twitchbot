@@ -8,23 +8,36 @@ module Twitchbot
     # @return [Hash] Collection of known badges for the user
     attr_reader :badges
 
-    def initialize(name, display_name = nil, id = nil, badges = nil)
+    def initialize(name, display_name = nil, id = nil)
       @name = name
       @display_name = display_name
       @id = id
-      @badges = badges.nil? ? nil : process_badges(badges)
     end
 
     # Method to update the main attributes of a user
-    def update_attributes(display_name, id, badges)
+    def update_attributes(display_name, id)
       @display_name = display_name
       @user_id = id
-      @badges = process_badges(badges)
+    end
+
+    # Method to process the string representation of badges into a Hash so that
+    # we can query it for specific badges and levels of the badges
+    def update_badges(badge)
+      @badges = {}
+      badge.split(',').each do |_badge|
+        type, value = _badge.split '/'
+        @badges[type] = value.to_i
+      end
     end
 
     # Method to grab the best representation of a user
     def name
       @display_name || @name
+    end
+
+    # Method to determine if the user is the broadcaster of the channel
+    def streamer?
+      @badges.key? 'broadcaster'
     end
 
     # Method to determine if the user is a moderator of the channel
@@ -60,17 +73,6 @@ module Twitchbot
     # Method to determine if the user is on the leaderboard for bit gifts
     def bits_leader?
       @badges.key? 'bits-leader'
-    end
-
-    # Method to process the string representation of badges into a Hash so that
-    # we can query it for specific badges and levels of the badges
-    def process_badges(badges)
-      badge = {}
-      badges.split(',').each do |_badge|
-        type, value = _badge.split '/'
-        badge[type] = value.to_i
-      end
-      badge
     end
 
     def to_s

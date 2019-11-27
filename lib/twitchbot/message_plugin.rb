@@ -9,6 +9,7 @@ module Twitchbot
     def message(handler)
       handler.messages.each do |message|
         if message.message?
+          # TODO: Extract this block from WhisperPlugin and MessagePlugin
           prefix = handler.bot.command_prefix
           _, _command, arguments = message.payload.partition(
               /#{Regexp.escape prefix}\S+/
@@ -16,7 +17,7 @@ module Twitchbot
           command = _command.delete prefix
           commands = COMMANDS[self.class]
           if !command.nil? && !commands[command].nil?
-            send(commands[command], message, arguments)
+            send(commands[command], message, arguments.lstrip)
           end
         end
       end
