@@ -36,22 +36,25 @@ module Twitchbot
       @target = target
       @payload = payload
 
-      if message?
+      if message? || whisper?
         @payload.slice! 0, 1
         @channel = @handler.bot.channel
-        /bits=(?<bits>\d+)/ =~ @tags
-        @bits = bits.nil? ? 0 : bits.to_i
-        /display-name=(?<display_name>\w+)/ =~ @tags
-        /user-id=(?<user_id>[a-zA-Z0-9\-]+)/ =~ @tags
-        /badges=(?<badges>[a-zA-Z\/,0-9\-]+)/ =~ @tags
-        badges = badges || ''
+        @display_name = @tags[/display-name=(\w+)/, 1]
+        @user_id = @tags[/user-id=(?<user_id>\d+)/, 1]
         /:(?<user>\w+)/ =~ @sender
         if @channel.users.key? user
-          @channel.users[user].update_attributes display_name, user_id, badges
+          @channel.users[user].update_attributes @display_name, @user_id
         else
-          @channel.users[user] = User.new user, display_name, user_id, badges
+          @channel.users[user] = User.new user, @display_name, @user_id
         end
         @user = @channel.users[user]
+      end
+
+      if message?
+        /bits=(?<bits>\d+)/ =~ @tags
+        @bits = bits.nil? ? 0 : bits.to_i
+        /badges=(?<badges>[a-zA-Z\/,0-9\-]+)/ =~ @tags
+        @user.update_badges badges || ''
       end
     end
 
