@@ -36,7 +36,7 @@ module Twitchbot
 
     # Add a whisper to the specified user to the message queue
     def send_whisper(user, message)
-      @bot.message_queue.push("PRIVMSG jtv :/w #{user} :#{message}")
+      @bot.message_queue.push("PRIVMSG #jtv :/w #{user} #{message}")
     end
 
     # Method that provides a shortcut to grab the first message in an event
