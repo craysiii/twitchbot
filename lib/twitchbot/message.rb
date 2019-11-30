@@ -56,6 +56,14 @@ module Twitchbot
         /badges=(?<badges>[a-zA-Z\/,0-9\-]+)/ =~ @tags
         @user.update_badges badges || ''
       end
+
+      # Grab broadcaster status even though twitch doesn't inject it in the tags
+      # in a whisper
+      if whisper?
+        if @user.name.downcase.eql? @handler.bot.channel.name.downcase
+          @user.update_badges 'broadcaster/1'
+        end
+      end
     end
 
     # Method to determine if the IRC message includes any tags from the +:twitch.tv/tags+ capability
