@@ -12,6 +12,7 @@ module Twitchbot
       @name = name
       @display_name = display_name
       @id = id
+      @badges = {}
     end
 
     # Method to update the main attributes of a user
