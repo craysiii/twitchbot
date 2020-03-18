@@ -3,9 +3,8 @@ require 'faye/websocket'
 
 require_relative 'event_handler'
 require_relative 'channel'
-require_relative 'plugin/debug_plugin'
 require_relative 'plugin/auth_plugin'
-require_relative 'plugin/ping_plugin'
+require_relative 'plugin/connection_plugin'
 require_relative 'plugin/channel_plugin'
 require_relative 'plugin/message_queue_plugin'
 
@@ -31,11 +30,11 @@ module Twitchbot
     # The connection URL for Twitch
     DEFAULT_URL = 'wss://irc-ws.chat.twitch.tv'.freeze
     # The built-in plugins to be used
-    DEFAULT_PLUGINS = [AuthPlugin,
-                       PingPlugin,
-                       ChannelPlugin,
+    DEFAULT_PLUGINS = [ConnectionPlugin,
                        MessageQueuePlugin,
-                       DebugPlugin].freeze
+                       AuthPlugin,
+                       ChannelPlugin
+                      ].freeze
     # The events that eventmachine  dispatches to any plugins in use
     DEFAULT_EVENTS = %i[error close open message].freeze
 
@@ -59,7 +58,7 @@ module Twitchbot
     def start
       EM.run do
         connection = Faye::WebSocket::Client.new DEFAULT_URL
-        plugins = (@plugins << DEFAULT_PLUGINS).flatten!.reverse!.map! &:new
+        plugins = (DEFAULT_PLUGINS + @plugins).flatten.map! &:new
         DEFAULT_EVENTS.each do |default_event|
           connection.on(default_event) do |em_event|
             handler = EventHandler.new em_event, connection, self
