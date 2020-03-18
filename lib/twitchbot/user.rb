@@ -18,7 +18,7 @@ module Twitchbot
     # Method to update the main attributes of a user
     def update_attributes(display_name, id)
       @display_name = display_name
-      @user_id = id
+      @id = id
     end
 
     # Method to process the string representation of badges into a Hash so that
