@@ -9,7 +9,7 @@ module Twitchbot
     include Twitchbot::TimedPlugin
 
     # The most privileged bot can only send 7200 messages every 30 seconds
-    register method: :send_message, interval: (30 / 7200)
+    register method: :send_message, interval: (30 / 7200.0)
     # Pull a message from the message queue if any are available and send to the
     # server
     def send_message(handler)
