@@ -14,22 +14,18 @@ module Twitchbot
     # the channel
     #
     #   > :tmi.twitch.tv CAP * ACK :twitch.tv/tags twitch.tv/commands twitch.tv/membership
-    def join_channel(handler)
-      handler.send_raw "JOIN ##{handler.bot.channel.name}"
+    def join_channel(message)
+      message.send_raw "JOIN ##{message.channel.name}"
     end
 
     register command: 'JOIN', method: :process_join
     # Listen for any JOIN commands and add the user to the channel user list
     #
     #   > :<user>!<user>@<user>.tmi.twitch.tv JOIN #<channel>
-    def process_join(handler)
-      channel = handler.bot.channel
-      handler.messages.each do |message|
-        /:(?<sender>\w+)/ =~ message.raw
-        unless channel.users.key? sender
-          channel.users[sender] = User.new sender
-        end
-      end
+    def process_join(message)
+      channel = message.channel
+      /:(?<sender>\w+)/ =~ message.raw
+      channel.users[sender] = User.new sender unless channel.users.key? sender
     end
 
     register command: 'PART', method: :process_part
@@ -37,14 +33,10 @@ module Twitchbot
     # list
     #
     #   > :<user>!<user>@<user>.tmi.twitch.tv PART #<channel>
-    def process_part(handler)
-      channel = handler.bot.channel
-      handler.messages.each do |message|
-        /:(?<sender>\w+)/ =~ message.raw
-        if channel.users.key? sender
-          channel.users.delete sender
-        end
-      end
+    def process_part(message)
+      channel = message.channel
+      /:(?<sender>\w+)/ =~ message.raw
+      channel.users.delete sender if channel.users.key? sender
     end
   end
 end

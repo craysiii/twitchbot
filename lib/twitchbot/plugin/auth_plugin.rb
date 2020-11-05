@@ -30,8 +30,8 @@ module Twitchbot
     #   > :tmi.twitch.tv 375 bot :-
     #   > :tmi.twitch.tv 372 bot :You are in a maze of twisty passages, all alike.
     #   > :tmi.twitch.tv 376 bot :>
-    def request_caps(handler)
-      handler.send_raw "CAP REQ :#{CAPABILITIES.join ' '}"
+    def request_caps(message)
+      message.send_raw "CAP REQ :#{CAPABILITIES.join ' '}"
     end
   end
 end

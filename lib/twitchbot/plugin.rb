@@ -25,7 +25,7 @@ module Twitchbot
         commands = COMMANDS[self.class]
         if !command.nil? && !commands[command].nil?
           # Call the including class method and pass the EventHandler to it
-          send(commands[command], handler)
+          send(commands[command], message)
         end
       end
     end
