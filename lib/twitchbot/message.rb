@@ -22,6 +22,8 @@ module Twitchbot
     attr_reader :target
     # @return [String] Content of the IRC message
     attr_reader :payload
+    # @return [EventHandler] EventHandler associated with the IRC message
+    attr_reader :handler
 
     def initialize(handler, raw_message)
       @handler = handler
@@ -36,9 +38,10 @@ module Twitchbot
       @target = target
       @payload = payload
 
+      @channel = @handler.bot.channel
+
       if message? || whisper?
         @payload.slice! 0, 1
-        @channel = @handler.bot.channel
         @display_name = @tags[/display-name=(\w+)/, 1]
         @user_id = @tags[/user-id=(?<user_id>\d+)/, 1]
         /:(?<user>\w+)/ =~ @sender
@@ -83,12 +86,8 @@ module Twitchbot
 
     # Method to respond to the IRC message target with a private message
     def respond(message)
-      if message?
-        send_channel message
-      end
-      if whisper?
-        send_whisper @user, message
-      end
+      send_channel message if message?
+      send_whisper @user, message if whisper?
     end
 
     # Method to send a message to the joined [Channel]
@@ -99,6 +98,11 @@ module Twitchbot
     # Method to send a whisper to the specified [User]
     def send_whisper(user, message)
       @handler.send_whisper user, message
+    end
+
+    # Method to send a raw IRC message to the server
+    def send_raw(message)
+      @handler.send_raw message
     end
 
     # Method to determine if the IRC message is a PING challenge
