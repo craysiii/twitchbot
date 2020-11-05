@@ -13,6 +13,11 @@ module Twitchbot
     # all logic for managing timed plugins yourself
     def open(handler)
       COMMANDS[self.class].each do |command, params|
+        # Schedule initial timer
+        EM::Timer.new(params[:offset]) do
+          send(command, handler)
+        end
+        # Schedule future timers
         EM::Timer.new(params[:offset]) do
           EM::PeriodicTimer.new(params[:interval]) do
             send(command, handler)
