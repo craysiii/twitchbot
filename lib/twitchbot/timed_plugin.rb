@@ -12,9 +12,11 @@ module Twitchbot
     # It is not recommended to override this method unless you plan on handling
     # all logic for managing timed plugins yourself
     def open(handler)
-      COMMANDS[self.class].each do |command, interval|
-        EM::PeriodicTimer.new(interval) do
-          send(command, handler)
+      COMMANDS[self.class].each do |command, params|
+        EM::Timer.new(params[:offset]) do
+          EM::PeriodicTimer.new(params[:interval]) do
+            send(command, handler)
+          end
         end
       end
     end
@@ -39,7 +41,9 @@ module Twitchbot
       klass.instance_eval do
         define_singleton_method 'register' do |params|
           COMMANDS[klass] = {} if COMMANDS[klass].nil?
-          COMMANDS[klass][params[:method]] = params[:interval]
+          COMMANDS[klass][params[:method]] = {}
+          COMMANDS[klass][params[:method]][:interval] = params[:interval]
+          COMMANDS[klass][params[:method]][:offset] = params.key?(:offset) ? params[:offset] : 0
         end
       end
     end
