@@ -22,8 +22,8 @@ module Twitchbot
     #   > :<user>!<user>@<user>.tmi.twitch.tv JOIN #<channel>
     def process_join(message)
       channel = message.channel
-      /:(?<sender>\w+)/ =~ message.raw
-      channel.users[sender] = User.new sender unless channel.users.key? sender
+      /:(?<user>\w+)/ =~ message.raw
+      channel.users[user] = User.new user unless channel.users.key? user
     end
 
     register command: 'PART', method: :process_part
@@ -33,8 +33,8 @@ module Twitchbot
     #   > :<user>!<user>@<user>.tmi.twitch.tv PART #<channel>
     def process_part(message)
       channel = message.channel
-      /:(?<sender>\w+)/ =~ message.raw
-      channel.users.delete sender if channel.users.key? sender
+      /:(?<user>\w+)/ =~ message.raw
+      channel.users.delete user if channel.users.key? user
     end
 
     register command: '353', method: :process_mass_join
