@@ -4,8 +4,6 @@ require_relative '../user'
 module Twitchbot
   # Plugin to handle joining the specified channel, as well as maintaining a
   # list of users who have joined or left the channel
-  #
-  # TODO: Handle 353 and 366 (NAMES list)
   class ChannelPlugin
     include Twitchbot::Plugin
 
@@ -24,8 +22,8 @@ module Twitchbot
     #   > :<user>!<user>@<user>.tmi.twitch.tv JOIN #<channel>
     def process_join(message)
       channel = message.channel
-      /:(?<sender>\w+)/ =~ message.raw
-      channel.users[sender] = User.new sender unless channel.users.key? sender
+      /:(?<user>\w+)/ =~ message.raw
+      channel.users[user] = User.new user unless channel.users.key? user
     end
 
     register command: 'PART', method: :process_part
@@ -35,8 +33,20 @@ module Twitchbot
     #   > :<user>!<user>@<user>.tmi.twitch.tv PART #<channel>
     def process_part(message)
       channel = message.channel
-      /:(?<sender>\w+)/ =~ message.raw
-      channel.users.delete sender if channel.users.key? sender
+      /:(?<user>\w+)/ =~ message.raw
+      channel.users.delete user if channel.users.key? user
+    end
+
+    register command: '353', method: :process_mass_join
+    # Listen for any 353 JOIN commands add the users to the channel user list
+    #
+    #   > :<bot_username>.tmi.twitch.tv 353 <bot_username> = #<channel> :<space-delimited user list>
+    def process_mass_join(message)
+      channel = message.channel
+      /:(?<user_list>.+)/ =~ message.payload
+      user_list.split.each do |user|
+        channel.users[user] = User.new user unless channel.users.key? user
+      end
     end
   end
 end
