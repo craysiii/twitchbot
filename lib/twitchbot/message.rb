@@ -40,31 +40,33 @@ module Twitchbot
 
       @channel = @handler.bot.channel
 
-      if message? || whisper?
-        @payload.slice! 0, 1
-        @display_name = @tags[/display-name=(\w+)/, 1]
-        @user_id = @tags[/user-id=(?<user_id>\d+)/, 1]
-        /:(?<user>\w+)/ =~ @sender
-        if @channel.users.key? user
-          @channel.users[user].update_attributes @display_name, @user_id
-        else
-          @channel.users[user] = User.new user, @display_name, @user_id
+      unless received_host?
+        if message? || whisper?
+          @payload.slice! 0, 1
+          @display_name = @tags[/display-name=(\w+)/, 1]
+          @user_id = @tags[/user-id=(?<user_id>\d+)/, 1]
+          /:(?<user>\w+)/ =~ @sender
+          if @channel.users.key? user
+            @channel.users[user].update_attributes @display_name, @user_id
+          else
+            @channel.users[user] = User.new user, @display_name, @user_id
+          end
+          @user = @channel.users[user]
         end
-        @user = @channel.users[user]
-      end
 
-      if message?
-        /bits=(?<bits>\d+)/ =~ @tags
-        @bits = bits.nil? ? 0 : bits.to_i
-        /badges=(?<badges>[a-zA-Z\/,0-9\-]+)/ =~ @tags
-        @user.update_badges badges || ''
-      end
+        if message?
+          /bits=(?<bits>\d+)/ =~ @tags
+          @bits = bits.nil? ? 0 : bits.to_i
+          /badges=(?<badges>[a-zA-Z\/,0-9\-]+)/ =~ @tags
+          @user.update_badges badges || ''
+        end
 
-      # Grab broadcaster status even though twitch doesn't inject it in the tags
-      # in a whisper
-      if whisper?
-        if @user.name.downcase.eql? @handler.bot.channel.name.downcase
-          @user.update_badges 'broadcaster/1'
+        # Grab broadcaster status even though twitch doesn't inject it in the tags
+        # in a whisper
+        if whisper?
+          if @user.name.downcase.eql? @handler.bot.channel.name.downcase
+            @user.update_badges 'broadcaster/1'
+          end
         end
       end
     end
@@ -82,6 +84,12 @@ module Twitchbot
     # Method to determine if the IRC message is a whisper to the bot
     def whisper?
       @command.eql? 'WHISPER'.freeze
+    end
+
+    # Method to determine if the IRC message is a received host message from Twitch
+    def received_host?
+      message? && target.downcase.eql?(@handler.bot.channel.name.downcase) &&
+        /:\w+ is now hosting you./.match?(@payload)
     end
 
     # Method to respond to the IRC message target with a private message
